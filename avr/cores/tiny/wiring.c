@@ -28,6 +28,7 @@
 
 #include "wiring_private.h"
 #include <avr/boot.h>
+#include <util/delay.h>
 
 
 
@@ -331,6 +332,9 @@ static void initToneTimerInternal(void);
 /* Delay for the given number of microseconds.  Assumes a 1, 8, 12, 16, 20 or 24 MHz clock. */
 void delayMicroseconds(unsigned int us)
 {
+    // below code is broken with LTO and constant arguments, fallback to avrlibc
+    if (__builtin_constant_p(us))
+      return _delay_us(us);
   // call = 4 cycles + 2 to 4 cycles to init us(2 for constant delay, 4 for variable)
 
   // calling avrlib's delay_us() function with low values (e.g. 1 or
